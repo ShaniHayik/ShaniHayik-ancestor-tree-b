@@ -44,11 +44,11 @@ void Tree::addParent(const string& parent, const string& son, bool addToFather)
 
     if(addToFather && ans->getFather() != nullptr) // father already exists in tree
     {
-        return;
+        throw std::out_of_range{"father already exists in tree"};
     }
     if(!addToFather && ans->getMother() != nullptr) // mother already exists in tree
     {
-        return;
+        throw std::out_of_range {"mother already exists in tree"};
     }
 
     Node* parentNode = new Node(parent);
