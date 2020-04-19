@@ -38,8 +38,7 @@ void Tree::addParent(const string& parent, const string& son, bool addToFather)
 
     if (ans == nullptr) // son doesn't exist in tree
     {
-        // cout << "the son is not exist";
-        return;
+        throw std::out_of_range{"the son is not exist"};;
     }
 
     if(addToFather && ans->getFather() != nullptr) // father already exists in tree
@@ -91,9 +90,9 @@ const string Tree::relation(const string& name) {
         return "me";
     }
 
-    if (this->root->getFather()->getName() == name) {
+    if (this->root->getFather() != nullptr && this->root->getFather()->getName() == name) {
         return "father";
-    } else if (this->root->getMother()->getName() == name) {
+    } else if (this->root->getMother() != nullptr && this->root->getMother()->getName() == name) {
         return "mother";
     } else {
         Node *ans = findTheSon(name, this->root);
@@ -147,11 +146,15 @@ const string& Tree::find(const string& related) {
     if (related == "me")
         return this->root->getName();
 
-    if (related == "mother")
-        return this->root->getMother()->getName();
+    if (related == "mother") {
+        if (this->root->getMother() == nullptr) throw std::out_of_range{"Mother doesn't exist"};
+        else return this->root->getMother()->getName();
+    }
 
-    else if (related == "father")
-        return this->root->getFather()->getName();
+    else if (related == "father") {
+        if (this->root->getFather() == nullptr) throw std::out_of_range{"Father doesn't exist"};
+        else return this->root->getFather()->getName();
+    }
 
     else if (related.length() < 11)
         throw std::out_of_range{"The tree cannot handle the " + related + " relation"};
@@ -173,26 +176,46 @@ const string& Tree::find(const string& related) {
         }
 
         i = 2;
-        Node *tryFather = this->root->getFather();
-        Node *tryMother = this->root->getMother();
+        Node *tryFather1 = this->root->getFather();
+        Node *tryMother1 = this->root->getMother();
+        Node *tryFather2 = this->root->getFather();
+        Node *tryMother2 = this->root->getMother();
 
         while (i <= count) {
-            if (tryMother->getMother() != nullptr) {
-                if (tryMother->getFather() != nullptr) tryFather = tryMother->getFather();
-                tryMother = tryMother->getMother();
+            if (tryMother1 != nullptr) {
+                if (tryMother1->getFather() != nullptr) tryFather1 = tryMother1->getFather();
+                if (tryMother1->getMother() != nullptr) tryMother1 = tryMother1->getMother();
             }
 
-            else {
-                if (tryFather->getMother() != nullptr) tryMother = tryFather->getMother();
-                if (tryFather->getFather() != nullptr) tryFather = tryFather->getFather();
+            if (tryMother2 != nullptr && i >= 3) {
+                if (tryMother2->getFather() != nullptr) tryFather2 = tryMother2->getFather();
+                if (tryMother2->getMother() != nullptr) tryMother2 = tryMother2->getMother();
             }
+
+            if (tryFather2 != nullptr) {
+                if (tryFather2->getMother() != nullptr) tryMother2 = tryFather2->getMother();
+                if (tryFather2->getFather() != nullptr) tryFather2 = tryFather2->getFather();
+            }
+
+            if (tryFather1 != nullptr  && i >= 3) {
+                if (tryFather1->getMother() != nullptr) tryMother1 = tryFather1->getMother();
+                if (tryFather1->getFather() != nullptr) tryFather1 = tryFather1->getFather();
+            }
+
             i++;
         }
-        string a =relation(tryMother->getName());
-        if(relation(tryMother->getName()) == related) {
-            return tryMother->getName();
+
+        //string a = relation(tryMother1->getName());
+        if ((tryMother1 != nullptr) && (relation(tryMother1->getName()) == related)) {
+            return tryMother1->getName();
+        } else if (tryMother2 != nullptr && relation(tryMother2->getName()) == related) {
+            return tryMother2->getName();
         }
-        else return tryFather->getName();
+        if (tryFather1 != nullptr && relation(tryFather1->getName()) == related) {
+            return tryFather1->getName();
+        } else if(tryFather2 != nullptr && relation(tryFather2->getName()) == related) return tryFather2->getName();
+
+        throw std::out_of_range{"This relation doesn't exsit in the tree"};
     }
 }
 
@@ -250,17 +273,24 @@ void Tree::printSubtree(Node* root, const string& prefix)
 
 void Tree::remove(const string& name) {
     Node* ans = findTheSon(name, this->root);
+
+    if(name == this->root->getName()) {
+        throw std::out_of_range{ "Can not delete the root"};
+    }
+
     if(ans == nullptr) {
         throw std::out_of_range{ "The name does not exist, there is no node to delete"};
     }
 
     else {
         Node* son = ans->getSon();
-        if(son->getFather()->getName() == name)
+        if(son->getFather() != nullptr && son->getFather()->getName() == name) {
             son->setFather(nullptr);
-
-        else
+            delete ans;
+        }
+        else {
             son->setMother(nullptr);
+            delete ans;
+        }
     }
 }
-

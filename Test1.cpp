@@ -1,8 +1,8 @@
 /**
  * A demonstration test program for Gimatriya calculation.
- * 
+ *
  * Use this as a basis to build a more complete Test.cpp file.
- * 
+ *
  * Date: 2020-02
  */
 
@@ -12,7 +12,7 @@
 #include <string>
 using namespace std;
 
-TEST_CASE("Test case 1") {  
+TEST_CASE("Test case 1") {
 	family::Tree T ("Yosef"); // Yosef is the "root" of the tree (the youngest person).
 	T.addFather("Yosef", "Yaakov");   // Tells the tree that the father of Yosef is Yaakov.
 	T.addMother("Yosef", "Rachel");
